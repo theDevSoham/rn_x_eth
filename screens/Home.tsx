@@ -1,12 +1,13 @@
 /* eslint-disable prettier/prettier */
 import React, {useState} from 'react';
 import {
-  ImageBackground,
   TextInput,
   TouchableOpacity,
   Text,
   StyleSheet,
   Alert,
+  View,
+  Image,
 } from 'react-native';
 import bg_img from '../assets/images/bg_img.jpg';
 
@@ -17,29 +18,35 @@ const Home: React.FC = () => {
 
   const handleSubmit = () => {
     if (pvtKey === '' || sendAddr === '' || amount === '') {
-      Alert.alert('Error','Please fill all fields');
+      Alert.alert('Error', 'Please fill all fields');
       return;
     }
-	Alert.alert('Submitted');
+    Alert.alert('Submitted');
   };
 
   return (
-    <ImageBackground source={bg_img} style={styles.container}>
+    <View style={styles.container}>
+      <View style={styles.imgContainer}>
+        <Image source={bg_img} style={styles.img} />
+      </View>
       <TextInput
         style={styles.input}
         placeholder="Sender Private Key"
+        placeholderTextColor={'#fff'}
         value={pvtKey}
         onChangeText={setPvtKey}
       />
       <TextInput
         style={styles.input}
         placeholder="Address to Send to"
+        placeholderTextColor={'#fff'}
         value={sendAddr}
         onChangeText={setSendAddr}
       />
       <TextInput
         style={styles.input}
         placeholder="Amount"
+        placeholderTextColor={'#fff'}
         keyboardType="numeric"
         value={amount}
         onChangeText={setAmount}
@@ -47,7 +54,7 @@ const Home: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
-    </ImageBackground>
+    </View>
   );
 };
 
@@ -56,7 +63,7 @@ const styles = StyleSheet.create({
     flex: 1,
     alignItems: 'center',
     justifyContent: 'center',
-    backgroundColor: '#fff',
+    backgroundColor: '#000',
   },
   input: {
     width: '80%',
@@ -64,7 +71,7 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     borderWidth: 1,
     borderColor: '#fff',
-    backgroundColor: 'rgba(255, 255, 255, 0.5)',
+    backgroundColor: 'rgba(255, 255, 255, 0.3)',
     marginBottom: 20,
     paddingHorizontal: 10,
     fontSize: 18,
@@ -79,6 +86,16 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 18,
+  },
+  img: {width: 100, height: '100%'},
+  imgContainer: {
+	position: 'absolute',
+	top: 100,
+	left: 0,
+	width: '100%',
+	height: 100,
+	justifyContent: 'center',
+	alignItems: 'center',
   },
 });
 
