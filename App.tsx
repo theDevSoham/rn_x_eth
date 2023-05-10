@@ -1,92 +1,39 @@
 /* eslint-disable prettier/prettier */
-/* eslint-disable react/react-in-jsx-scope */
-import {useState} from 'react';
-import {View, TextInput, Button, Alert} from 'react-native';
-import {Buffer} from 'buffer';
+import {SafeAreaView, StyleSheet} from 'react-native';
+import React from 'react';
+import {NavigationContainer} from '@react-navigation/native';
+import {createNativeStackNavigator} from '@react-navigation/native-stack';
+import CatchyStatusBar from './components/CatchyStatusBar';
+import Splash from './screens/Splash';
+import Home from './screens/Home';
 
-async function sendTransaction(
-  senderAddress: string,
-  senderPrivateKey: string,
-  receiverAddress: string,
-  amount: number,
-) {
-  // Construct the JSON-RPC payload
-  const payload = {
-    jsonrpc: '2.0',
-    method: 'eth_sendTransaction',
-    params: [
-      {
-        from: senderAddress,
-        to: receiverAddress,
-        value: `0x${Number(amount).toString(16)}`,
-      },
-    ],
-    id: 1,
-  };
-
-  // Encode the payload as JSON and convert it to hex
-  const json = JSON.stringify(payload);
-  const hex = Buffer.from(json).toString('hex');
-
-  // Construct the HTTP request options
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: `{"jsonrpc":"2.0","id":1,"method":"eth_sendRawTransaction","params":["0x${hex}"]}`,
-  };
-
-  // Send the HTTP request to Infura endpoint
-  const response = await fetch(
-    'https://sepolia.infura.io/v3/3e71c39f476040a498217bd8ddac375f',
-    options,
-  );
-  const result_1 = await response.json();
-  console.log('Result: ', result_1);
-  return result_1.result;
-}
-
-export default function App() {
-  const [senderAddress, setSenderAddress] = useState('');
-  const [senderPrivateKey, setSenderPrivateKey] = useState('');
-  const [receiverAddress, setReceiverAddress] = useState('');
-  const [amount, setAmount] = useState('');
-
-  async function handleSend() {
-    try {
-      const txHash = await sendTransaction(
-        senderAddress,
-        senderPrivateKey,
-        receiverAddress,
-        Number(amount),
-      );
-      Alert.alert('Transaction Sent', `Transaction hash: ${txHash}`);
-    } catch (error) {
-      console.error(error);
-      Alert.alert('Error', 'Failed to send transaction');
-    }
-  }
-
+const App = () => {
+  const Stack = createNativeStackNavigator();
   return (
-    <View>
-      <TextInput
-        placeholder="Sender Address"
-        value={senderAddress}
-        onChangeText={setSenderAddress}
-      />
-      <TextInput
-        placeholder="Sender Private Key"
-        value={senderPrivateKey}
-        onChangeText={setSenderPrivateKey}
-      />
-      <TextInput
-        placeholder="Receiver Address"
-        value={receiverAddress}
-        onChangeText={setReceiverAddress}
-      />
-      <TextInput placeholder="Amount" value={amount} onChangeText={setAmount} />
-      <Button title="Send" onPress={handleSend} />
-    </View>
+    <SafeAreaView style={styles.container}>
+      <CatchyStatusBar backgroundColor="#a423c4" barStyle="light-content" />
+      <NavigationContainer>
+        <Stack.Navigator initialRouteName="Splash">
+          <Stack.Screen
+            name="Splash"
+            component={Splash}
+            options={{headerShown: false}}
+          />
+          <Stack.Screen
+            name="Home"
+            component={Home}
+            options={{headerShown: false}}
+          />
+        </Stack.Navigator>
+      </NavigationContainer>
+    </SafeAreaView>
   );
-}
+};
+
+export default App;
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+  },
+});
