@@ -10,61 +10,94 @@ import {
   Image,
 } from 'react-native';
 import bg_img from '../assets/images/bg_img.jpg';
-import axios from 'axios';
 import Loader from '../components/Loader';
+import { Buffer } from 'buffer';
+
+async function sendTransaction(
+  senderAddress: string,
+  senderPrivateKey: string,
+  receiverAddress: string,
+  amount: number,
+) {
+  // Construct the JSON-RPC payload
+  const payload = {
+    jsonrpc: '2.0',
+    method: 'eth_sendTransaction',
+    params: [
+      {
+        from: senderAddress,
+        to: receiverAddress,
+        value: `0x${Number(amount).toString(16)}`,
+        gasPrice: '21000',
+      },
+    ],
+    id: 1,
+  };
+
+  // Encode the payload as JSON and convert it to hex
+  const json = JSON.stringify(payload);
+  const hex = Buffer.from(json).toString('hex');
+
+  // Construct the HTTP request options
+  const options = {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: `{"jsonrpc":"2.0","id":1,"method":"eth_sendRawTransaction","params":["0x${hex}"]}`,
+  };
+
+  // Send the HTTP request to Infura endpoint
+  const response = await fetch(
+    'https://sepolia.infura.io/v3/3e71c39f476040a498217bd8ddac375f',
+    options,
+  );
+  const result_1 = await response.json();
+  console.log('Result: ', result_1);
+  return result_1.result;
+}
+
+
 
 const Home: React.FC = () => {
   const [pvtKey, setPvtKey] = useState('');
   const [sendAddr, setSendAddr] = useState('');
+  const [senderAddr, setSenderAddr] = useState('');
   const [amount, setAmount] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [status, setStatus] = useState('pending');
 
   const clearInputs = (): void => {
-	setPvtKey('');
-	setSendAddr('');
-	setAmount('');
+    setPvtKey('');
+    setSendAddr('');
+    setAmount('');
+    setSenderAddr('');
   };
 
-  const handleSubmit = () => {
-    if (pvtKey === '' || sendAddr === '' || amount === '') {
+  const handleSubmit = async () => {
+    if (pvtKey === '' || sendAddr === '' || amount === '' || senderAddr === '') {
       Alert.alert('Error', 'Please fill all fields');
       return;
     }
-	setIsLoading(true);
-	setStatus('pending');
-    let data = JSON.stringify({
-      senderKey: pvtKey,
-      to: sendAddr,
-      amount: amount,
-    });
-
-    let config = {
-      method: 'post',
-      maxBodyLength: Infinity,
-      url: 'https://rnxeth.onrender.com/send',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      data: data,
-    };
-
-    axios
-      .request(config)
-      .then(response => {
-		setIsLoading(false);
-		setStatus('completed');
-        Alert.alert(
-          'Success',
-          'Transaction sent successfully with hash: ' + response,
-        );
-		clearInputs();
-      })
-      .catch(error => {
-		setIsLoading(false);
-		setStatus('failed');
-        console.log(error);
-      });
+    setIsLoading(true);
+    setStatus('pending');
+    try {
+      const txHash = await sendTransaction(
+        sendAddr,
+        pvtKey,
+        senderAddr,
+        Number(amount),
+      );
+      setIsLoading(false);
+      setStatus('success');
+      Alert.alert('Transaction Sent', `Transaction hash: ${txHash}`);
+      clearInputs();
+    } catch (error) {
+      console.error(error);
+      setIsLoading(false);
+      setStatus('error');
+      Alert.alert('Error', 'Failed to send transaction');
+    }
   };
 
   return (
@@ -85,6 +118,13 @@ const Home: React.FC = () => {
         placeholderTextColor={'#fff'}
         value={sendAddr}
         onChangeText={setSendAddr}
+      />
+      <TextInput
+        style={styles.input}
+        placeholder="Sender Address"
+        placeholderTextColor={'#fff'}
+        value={senderAddr}
+        onChangeText={setSenderAddr}
       />
       <TextInput
         style={styles.input}
