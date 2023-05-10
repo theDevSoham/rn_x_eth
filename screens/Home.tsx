@@ -10,18 +10,61 @@ import {
   Image,
 } from 'react-native';
 import bg_img from '../assets/images/bg_img.jpg';
+import axios from 'axios';
+import Loader from '../components/Loader';
 
 const Home: React.FC = () => {
   const [pvtKey, setPvtKey] = useState('');
   const [sendAddr, setSendAddr] = useState('');
   const [amount, setAmount] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const [status, setStatus] = useState('pending');
+
+  const clearInputs = (): void => {
+	setPvtKey('');
+	setSendAddr('');
+	setAmount('');
+  };
 
   const handleSubmit = () => {
     if (pvtKey === '' || sendAddr === '' || amount === '') {
       Alert.alert('Error', 'Please fill all fields');
       return;
     }
-    Alert.alert('Submitted');
+	setIsLoading(true);
+	setStatus('pending');
+    let data = JSON.stringify({
+      senderKey: pvtKey,
+      to: sendAddr,
+      amount: amount,
+    });
+
+    let config = {
+      method: 'post',
+      maxBodyLength: Infinity,
+      url: 'https://rnxeth.onrender.com/send',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      data: data,
+    };
+
+    axios
+      .request(config)
+      .then(response => {
+		setIsLoading(false);
+		setStatus('completed');
+        Alert.alert(
+          'Success',
+          'Transaction sent successfully with hash: ' + response,
+        );
+		clearInputs();
+      })
+      .catch(error => {
+		setIsLoading(false);
+		setStatus('failed');
+        console.log(error);
+      });
   };
 
   return (
@@ -54,6 +97,7 @@ const Home: React.FC = () => {
       <TouchableOpacity style={styles.button} onPress={handleSubmit}>
         <Text style={styles.buttonText}>Submit</Text>
       </TouchableOpacity>
+      {isLoading && <Loader status={status} />}
     </View>
   );
 };
@@ -89,13 +133,13 @@ const styles = StyleSheet.create({
   },
   img: {width: 100, height: '100%'},
   imgContainer: {
-	position: 'absolute',
-	top: 100,
-	left: 0,
-	width: '100%',
-	height: 100,
-	justifyContent: 'center',
-	alignItems: 'center',
+    position: 'absolute',
+    top: 100,
+    left: 0,
+    width: '100%',
+    height: 100,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
 });
 
