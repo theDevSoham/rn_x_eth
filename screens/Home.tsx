@@ -11,6 +11,7 @@ import {
 } from 'react-native';
 import bg_img from '../assets/images/bg_img.jpg';
 import Loader from '../components/Loader';
+import Moralis from 'moralis';
 
 const Home: React.FC = () => {
   const [pvtKey, setPvtKey] = useState('');
@@ -26,13 +27,13 @@ const Home: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    if (pvtKey === '' || sendAddr === '' || amount === '') {
-      Alert.alert('Error', 'Please fill all fields');
-      return;
-    }
-	setIsLoading(true);
-	setStatus('pending');
-	clearInputs();
+    // if (pvtKey === '' || sendAddr === '' || amount === '') {
+    //   Alert.alert('Error', 'Please fill all fields');
+    //   return;
+    // }
+	// setIsLoading(true);
+	// setStatus('pending');
+	//clearInputs();
   };
 
   return (
