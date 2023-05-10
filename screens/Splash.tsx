@@ -5,7 +5,7 @@ import {Animated, StyleSheet, ImageBackground} from 'react-native';
 import bg_img from '../assets/images/bg_img.jpg';
 import { useNavigation } from '@react-navigation/native';
 
-const Splash = () => {
+const Splash: React.FC = () => {
   const [animation] = useState(new Animated.Value(0));
   const navigation = useNavigation();
 
