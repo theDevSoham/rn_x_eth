@@ -11,52 +11,7 @@ import {
 } from 'react-native';
 import bg_img from '../assets/images/bg_img.jpg';
 import Loader from '../components/Loader';
-import { Buffer } from 'buffer';
-
-async function sendTransaction(
-  senderAddress: string,
-  senderPrivateKey: string,
-  receiverAddress: string,
-  amount: number,
-) {
-  // Construct the JSON-RPC payload
-  const payload = {
-    jsonrpc: '2.0',
-    method: 'eth_sendTransaction',
-    params: [
-      {
-        from: senderAddress,
-        to: receiverAddress,
-        value: `0x${Number(amount).toString(16)}`,
-        gasPrice: '21000',
-      },
-    ],
-    id: 1,
-  };
-
-  // Encode the payload as JSON and convert it to hex
-  const json = JSON.stringify(payload);
-  const hex = Buffer.from(json).toString('hex');
-
-  // Construct the HTTP request options
-  const options = {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: `{"jsonrpc":"2.0","id":1,"method":"eth_sendRawTransaction","params":["0x${hex}"]}`,
-  };
-
-  // Send the HTTP request to Infura endpoint
-  const response = await fetch(
-    'https://sepolia.infura.io/v3/3e71c39f476040a498217bd8ddac375f',
-    options,
-  );
-  const result_1 = await response.json();
-  console.log('Result: ', result_1);
-  return result_1.result;
-}
-
+import {sendTransaction} from '../Constants';
 
 
 const Home: React.FC = () => {
@@ -75,7 +30,12 @@ const Home: React.FC = () => {
   };
 
   const handleSubmit = async () => {
-    if (pvtKey === '' || sendAddr === '' || amount === '' || senderAddr === '') {
+    if (
+      pvtKey === '' ||
+      sendAddr === '' ||
+      amount === '' ||
+      senderAddr === ''
+    ) {
       Alert.alert('Error', 'Please fill all fields');
       return;
     }
